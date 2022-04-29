@@ -5,6 +5,8 @@ import glsl from "babel-plugin-glsl/macro";
 import "./Home.css";
 import { Suspense, useRef } from "react";
 import img1 from "../images/img1.jpg";
+import img2 from "../images/img2.jpg";
+import img3 from "../images/img3.jpg";
 import { useNavigate } from "react-router-dom";
 
 const ParallaxShaderMaterial = shaderMaterial(
@@ -67,19 +69,17 @@ const ParallaxShaderMaterial = shaderMaterial(
 
 extend({ ParallaxShaderMaterial });
 
-const Parallax = ({ position, navigate, page }) => {
+const Parallax = ({ position, navigate, page, image }) => {
   const ref = useRef();
   useFrame(({ clock }) => {
     ref.current.uTime = clock.getElapsedTime();
   });
 
-  const [image1] = useLoader(THREE.TextureLoader, [img1]);
-
   return (
     <>
       <mesh position={position} onClick={() => navigate(page)}>
         <planeBufferGeometry args={[1.5, 1, 20, 20]} />
-        <parallaxShaderMaterial ref={ref} uTexture={image1} />
+        <parallaxShaderMaterial ref={ref} uTexture={image} />
       </mesh>
     </>
   );
@@ -90,13 +90,33 @@ const Groupee = ({ navigate }) => {
   useFrame(({ clock }) => {
     ref.current.position.y = Math.sin(clock.getElapsedTime()) * 0.03;
   });
+  const [image1, image2, image3] = useLoader(THREE.TextureLoader, [
+    img1,
+    img2,
+    img3,
+  ]);
+
   // HEEEEEEEEEEEEEERRRRRRRRRRRRRRRRRRRRRREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
   return (
     <group ref={ref} position={[0.5, 0, 0]} rotation={[-0.2, -0.5, -0.1]}>
-      <Parallax position={[0, 1, 0]} navigate={navigate} page={"/page1"} />
-      <Parallax position={[0, -0.2, 0]} navigate={navigate} page={"/page2"} />
-      <Parallax position={[0, -1.3, 0]} navigate={navigate} page={"/page1"} />
-      <Parallax position={[0, -3, 0]} navigate={navigate} />
+      <Parallax
+        position={[0, 1, 0]}
+        navigate={navigate}
+        page={"/page1"}
+        image={image1}
+      />
+      <Parallax
+        position={[0, -0.2, 0]}
+        navigate={navigate}
+        page={"/page2"}
+        image={image2}
+      />
+      <Parallax
+        position={[0, -1.3, 0]}
+        navigate={navigate}
+        page={"/page1"}
+        image={image3}
+      />
     </group>
   );
 };
