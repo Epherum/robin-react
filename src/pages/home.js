@@ -90,6 +90,7 @@ const Groupee = ({ navigate }) => {
   useFrame(({ clock }) => {
     ref.current.position.y = Math.sin(clock.getElapsedTime()) * 0.03;
   });
+  // HEEEEEEEEEEEEEERRRRRRRRRRRRRRRRRRRRRREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
   return (
     <group ref={ref} position={[0.5, 0, 0]} rotation={[-0.2, -0.5, -0.1]}>
       <Parallax position={[0, 1, 0]} navigate={navigate} page={"/page1"} />
