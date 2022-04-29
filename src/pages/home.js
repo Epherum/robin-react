@@ -86,8 +86,13 @@ const Parallax = ({ position, navigate, page, image }) => {
 };
 
 const GroupeParallax = ({ navigate }) => {
+  // Clamp number between two values with the following line:
+  // const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+
+  function clamp(num, min, max) {
+    return num <= min ? min : num >= max ? max : num;
+  }
   let attractMode = false;
-  let uTime = 0;
   let oldPosition = 0;
   let attractTo = 0;
   let position = 0;
@@ -115,6 +120,7 @@ const GroupeParallax = ({ navigate }) => {
       ref.current.children[i].scale.set(scale, scale, scale);
       ref.current.children[i].material.uniforms.udstFromCenter.value = o.dist;
       position += Math.sign(diff) * Math.pow(Math.abs(diff), 0.7) * 0.015;
+      position = clamp(position, -0.3, 2.3);
       rounded = Math.round(position);
       diff = rounded - position;
     });
