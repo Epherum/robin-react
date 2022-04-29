@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 
 const ParallaxShaderMaterial = shaderMaterial(
   // Uniform
-  { uTime: 0, uTexture: new THREE.Texture() },
+  { uTime: 0, uTexture: new THREE.Texture(), udstFromCenter: 0 },
   //Vertex Shader
 
   glsl`
@@ -44,24 +44,24 @@ const ParallaxShaderMaterial = shaderMaterial(
    uniform float uTime;
    varying vec2 vUv;
    uniform sampler2D uTexture;
-   uniform float dstFromCenter;
+   uniform float udstFromCenter;
 
     void main() {
-      // vec4 t=texture2D(uTexture,vUv);
+      vec4 t=texture2D(uTexture,vUv);
 
-      // float bw=(t.r+t.b+t.g)/3.;
+      float bw=(t.r+t.b+t.g)/3.;
 
-      // vec4 another=vec4(bw,bw,bw,1.);
+      vec4 another=vec4(bw,bw,bw,1.);
 
     
 
-      // gl_FragColor = mix( another, t,dstFromCenter);
-      // gl_FragColor.a = clamp(dstFromCenter,0.6,1.);
+      gl_FragColor = mix( another, t,udstFromCenter);
+      gl_FragColor.a = clamp(udstFromCenter,0.6,.8);
 
 
-      vec3 texture = texture2D(uTexture, vUv).rgb;
+      // vec3 texture = texture2D(uTexture, vUv).rgb;
       
-      gl_FragColor = vec4(texture, .78);
+      // gl_FragColor = vec4(texture, .78);
     }
   
   `
@@ -85,11 +85,41 @@ const Parallax = ({ position, navigate, page, image }) => {
   );
 };
 
-const Groupee = ({ navigate }) => {
+const GroupeParallax = ({ navigate }) => {
+  let attractMode = false;
+  let uTime = 0;
+  let oldPosition = 0;
+  let attractTo = 0;
+  let position = 0;
+  let rounded = 0;
+  let scale = 0;
+  let speed = 0;
+  let diff = 0;
+  window.addEventListener("wheel", (e) => {
+    speed += e.deltaY * 0.0003;
+  });
+
+  // ref.current.position.y = Math.sin(clock.getElapsedTime()) * 0.03;
+
   const ref = useRef();
   useFrame(({ clock }) => {
-    ref.current.position.y = Math.sin(clock.getElapsedTime()) * 0.03;
+    position += speed;
+    speed *= 0.8;
+    let objs = Array(3).fill({ dist: 0 });
+
+    objs.forEach((o, i) => {
+      o.dist = Math.min(Math.abs(position - i), 1);
+      o.dist = 1 - o.dist ** 2;
+      scale = 1 + 0.1 * o.dist;
+      ref.current.children[i].position.y = -(i * 1.2 - position * 1.2);
+      ref.current.children[i].scale.set(scale, scale, scale);
+      ref.current.children[i].material.uniforms.udstFromCenter.value = o.dist;
+      position += Math.sign(diff) * Math.pow(Math.abs(diff), 0.7) * 0.015;
+      rounded = Math.round(position);
+      diff = rounded - position;
+    });
   });
+
   const [image1, image2, image3] = useLoader(THREE.TextureLoader, [
     img1,
     img2,
@@ -100,19 +130,19 @@ const Groupee = ({ navigate }) => {
   return (
     <group ref={ref} position={[0.5, 0, 0]} rotation={[-0.2, -0.5, -0.1]}>
       <Parallax
-        position={[0, 1, 0]}
+        position={[0, 0, 0]}
         navigate={navigate}
         page={"/page1"}
         image={image1}
       />
       <Parallax
-        position={[0, -0.2, 0]}
+        position={[0, -1.2, 0]}
         navigate={navigate}
         page={"/page2"}
         image={image2}
       />
       <Parallax
-        position={[0, -1.3, 0]}
+        position={[0, -2.4, 0]}
         navigate={navigate}
         page={"/page1"}
         image={image3}
@@ -124,9 +154,9 @@ const Groupee = ({ navigate }) => {
 const Scene = ({ navigate }) => {
   return (
     <div style={{ position: "fixed", width: "100%", height: "100%" }}>
-      <Canvas className="scene" camera={{ position: [0, 0, 4], fov: 60 }}>
+      <Canvas className="scene" camera={{ position: [0, 0, 2], fov: 60 }}>
         <Suspense fallback={null}>
-          <Groupee navigate={navigate} />
+          <GroupeParallax navigate={navigate} />
         </Suspense>
       </Canvas>
     </div>
